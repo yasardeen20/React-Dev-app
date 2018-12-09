@@ -1,0 +1,23 @@
+sudo: reruired
+services:
+  - docker
+
+before_install:
+  - docker build -t yasardeen/react-dev-testapp -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run yasardeen/react-dev-testapp npm test -- --coverage
+
+after_success:
+  - docker build -t yasardeen/multi-client ./client
+  - docker build -t yasardeen/multi-nginx ./nginx
+  - docker build -t yasardeen/multi-server ./server
+  - docker build -t yasardeen/multi-worker ./worker
+  #log in to the docker cli
+  - echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+  #push the images to docker hub
+  - docker push yasardeen/multi-client
+  - docker push yasardeen/multi-nginx
+  - docker push yasardeen/multi-server
+  - docker push yasardeen/multi-worker
+
